@@ -1,0 +1,10 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+services:
+  escolaapi:
+    image: escolaapi
+    build:
+      context: .
+      dockerfile: Escola.API/Dockerfile
+    ports:
+      - 5160:5160
