@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Escola.Domain.Entities
 {
-    public class Nota : BaseEntity
+    public class Nota
     {
         public int Id { get; set; }
         public int MatriculaId { get; set; }
