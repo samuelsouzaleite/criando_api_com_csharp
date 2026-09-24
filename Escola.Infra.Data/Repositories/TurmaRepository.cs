@@ -38,12 +38,12 @@ namespace Escola.Infra.Data.Repositories
 
         public async Task<List<Turma>> GetAllAsync()
         {
-            return await _context.Turma.Where(x => x.Excluido == false).ToListAsync();
+            return await _context.Turma.Include(x => x.Curso).Where(x => x.Excluido == false).ToListAsync();
         }
 
         public async Task<Turma> GetByIdAsync(int id)
         {
-            return await _context.Turma.Where(x => x.Excluido == false && x.Id == id).FirstOrDefaultAsync();
+            return await _context.Turma.Include(x => x.Curso).Where(x => x.Excluido == false && x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<Turma> UpdateAsync(Turma turma)

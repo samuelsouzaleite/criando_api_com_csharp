@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Escola.Application.Interfaces;
+using Escola.Application.Services;
+using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
 using Escola.Infra.Data.Context;
 using Escola.Infra.Data.Repositories;
@@ -25,6 +28,12 @@ namespace Escola.Infra.Ioc
             services.AddScoped<INotaRepository, NotaRepository>();
             services.AddScoped<ITurmaRepository, TurmaRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+            services.AddScoped<ICursoService, CursoService>();
+            services.AddScoped<IMatriculaService, MatriculaService>();
+            services.AddScoped<INotaService, NotaService>();
+            services.AddScoped<ITurmaService, TurmaService>();
+            services.AddScoped<IMatriculaService, MatriculaService>();
 
             return services;
         }
