@@ -222,5 +222,5 @@ Um diferencial do meu caminho: o curso usa **Visual Studio**, e eu fiz tudo pelo
 
 ## 👤 Autor
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-conectar-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/samuelsouzaleite)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-conectar-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/samuel-souza-leite-43281b252/)
 
