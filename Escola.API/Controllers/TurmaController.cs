@@ -57,6 +57,7 @@ namespace Escola.API.Controllers
             }
             return Ok(turma);
         }
+        
         [HttpGet]
         public async Task<ActionResult> GetAllTurmas()
         {
