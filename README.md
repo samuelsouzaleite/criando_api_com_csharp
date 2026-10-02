@@ -82,11 +82,13 @@ Exclusão é feita por **soft delete**: o registro recebe a marca de excluído e
 - [x] Documentação com Swagger
 - [x] Container Docker
 - [x] Credenciais fora do repositório
+- [x] Controllers de Curso, Turma, Matrícula e Nota, com CRUD completo
+- [x] Exceções próprias do domínio (`NotFoundException`, `BadRequestException`)
+- [x] Tratamento global de erros com middleware, traduzindo exceções em status HTTP e devolvendo um JSON padronizado
 
 ## 🚧 Em andamento
 
-- [ ] Controllers das demais entidades (Curso, Usuário, Matrícula, Nota)
-- [ ] Tratamento global de erros com middleware
+- [ ] Controller de Usuário
 - [ ] Autenticação e autorização com **JWT**
 - [ ] Controle de acesso por perfil (aluno, professor, administrador)
 - [ ] Paginação nas consultas
@@ -161,17 +163,42 @@ Swagger em **http://localhost:5160/swagger**
 
 ## 📡 Endpoints
 
-Implementados até aqui:
+Quatro entidades expõem o CRUD completo, seguindo o mesmo padrão de rotas:
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/api/Turma` | Lista todas as turmas com o curso relacionado |
-| `GET` | `/api/Turma/{id}` | Busca uma turma pelo id |
-| `POST` | `/api/Turma` | Cria uma nova turma |
-| `PUT` | `/api/Turma` | Atualiza uma turma existente |
-| `DELETE` | `/api/Turma/{id}` | Remove uma turma |
+| `GET` | `/api/{entidade}` | Lista todos os registros |
+| `GET` | `/api/{entidade}/{id}` | Busca um registro pelo id |
+| `POST` | `/api/{entidade}` | Cria um novo registro |
+| `PUT` | `/api/{entidade}` | Atualiza um registro existente |
+| `DELETE` | `/api/{entidade}/{id}` | Remove um registro |
 
-Os services e repositories de Curso, Usuário, Matrícula e Nota já existem. Os controllers vêm nas próximas etapas.
+Onde `{entidade}` é **Curso**, **Turma**, **Matricula** ou **Nota**.
+
+As consultas de Turma e Matrícula devolvem os dados relacionados (o curso da turma, o usuário e a turma da matrícula).
+
+O service e o repository de Usuário já existem, com o hash de senha pronto. O controller vem junto com a autenticação.
+
+### Respostas de erro
+
+Qualquer exceção é interceptada pelo middleware e devolvida em um formato único:
+
+```json
+{
+  "statusCode": "404",
+  "message": "Curso não encontrado.",
+  "details": "..."
+}
+```
+
+| Situação | Status |
+|---|---|
+| Registro não encontrado (`NotFoundException`) | `404` |
+| Requisição inválida (`BadRequestException`) | `400` |
+| Acesso não autorizado | `401` |
+| Qualquer outra exceção | `500` |
+
+O campo `details` traz o stack trace apenas em ambiente de desenvolvimento.
 
 ---
 
@@ -180,9 +207,12 @@ Os services e repositories de Curso, Usuário, Matrícula e Nota já existem. Os
 ```
 criando_api_com_csharp/
 ├── Escola.API/                    # Controllers, Program.cs, Dockerfile
-│   └── Controllers/
+│   ├── Controllers/
+│   ├── Errors/                    # Contrato de resposta de erro
+│   └── Middleware/                # Tratamento global de exceções
 ├── Escola.Application/            # Casos de uso
 │   ├── DTOs/                      # Um DTO por operação
+│   ├── Exceptions/                # Exceções próprias do domínio
 │   ├── Interfaces/
 │   └── Services/
 ├── Escola.Domain/                 # Núcleo
