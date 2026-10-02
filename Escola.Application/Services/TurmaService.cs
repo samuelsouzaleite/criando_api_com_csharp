@@ -1,5 +1,6 @@
 using Escola.Application.DTOs.Curso;
 using Escola.Application.DTOs.Turma;
+using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
@@ -12,12 +13,20 @@ namespace Escola.Application.Services
     public class TurmaService : ITurmaService
     {
         private readonly ITurmaRepository _turmaRepository;
-        public TurmaService(ITurmaRepository turmaRepository)
+        private readonly ICursoRepository _cursoRepository;
+        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository)
         {
             _turmaRepository = turmaRepository;
+            _cursoRepository = cursoRepository;
         }
         public async Task<TurmaGetDTO> AddAsync(TurmaPostDTO turmaPostDTO)
         {
+            var curso = await _cursoRepository.GetByIdAsync(turmaPostDTO.CursoId);
+            if (curso == null)
+            {
+                throw new NotFoundException("Curso não encontrado.");   
+            };
+
             var turma = new Turma
             {
                 Nome = turmaPostDTO.Nome,
@@ -88,13 +97,23 @@ namespace Escola.Application.Services
 
         public async Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO)
         {
-            var turma = new Turma
+            var turma = await _turmaRepository.GetByIdAsync(turmaPutDTO.Id);
+            if (turma == null)
             {
-                Id = turmaPutDTO.Id,
-                Nome = turmaPutDTO.Nome,
-                Descricao = turmaPutDTO.Descricao,
-                CursoId = turmaPutDTO.CursoId
+                throw new NotFoundException("Turma não encontrada.");
             };
+
+            var curso = await _cursoRepository.GetByIdAsync(turmaPutDTO.CursoId);
+            if (curso == null)
+            {
+                throw new NotFoundException("Curso não encontrado.");   
+            };
+
+            turma.Id = turmaPutDTO.Id;
+            turma.Nome = turmaPutDTO.Nome;
+            turma.Descricao = turmaPutDTO.Descricao;
+            turma.CursoId = turmaPutDTO.CursoId;
+
             var updatedTurma = await _turmaRepository.UpdateAsync(turma);
             if (updatedTurma == null)
                 return null;
