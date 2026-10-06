@@ -47,7 +47,7 @@ namespace Escola.Application.Services
         {
             var deletedTurma = await _turmaRepository.DeleteAsync(id);
             if (deletedTurma == null)
-                return null;
+                throw new NotFoundException("Turma não encontrada.");
             return new TurmaGetDTO
             {
                 Id = deletedTurma.Id,
@@ -80,7 +80,7 @@ namespace Escola.Application.Services
         {
             var turma = await _turmaRepository.GetByIdAsync(id);
             if (turma == null)
-                return null;
+                throw new NotFoundException("Turma não encontrada.");
             return new TurmaGetDetailDTO
             {
                 Id = turma.Id,
