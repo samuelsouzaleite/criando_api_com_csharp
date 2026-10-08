@@ -11,3 +11,4 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=User ID=postgres;Password=${DB_PASSWORD};Host=host.docker.internal;Port=5432;Database=Escola;Pooling=true;Connection Lifetime=0;
+      - Jwt__SecretKey=${JWT_SECRET}

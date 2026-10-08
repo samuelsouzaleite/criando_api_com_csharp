@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using Escola.Application.Interfaces;
 using Escola.Application.Services;
+using Escola.Domain.Account;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
 using Escola.Infra.Data.Context;
+using Escola.Infra.Data.Identity;
 using Escola.Infra.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +57,8 @@ namespace Escola.Infra.Ioc
             services.AddScoped<IMatriculaService, MatriculaService>();
             services.AddScoped<INotaService, NotaService>();
             services.AddScoped<ITurmaService, TurmaService>();
-            services.AddScoped<IMatriculaService, MatriculaService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IAuthenticate, AuthenticateService>();
 
             return services;
         }

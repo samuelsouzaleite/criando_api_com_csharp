@@ -41,7 +41,8 @@ namespace Escola.Application.Services
             {
                 Id = createdUsuario.Id,
                 Nome = createdUsuario.Nome,
-                Email = createdUsuario.Email
+                Email = createdUsuario.Email,
+                Perfil = createdUsuario.Perfil
             };
         }
 
@@ -54,7 +55,8 @@ namespace Escola.Application.Services
             {
                 Id = deletedUsuario.Id,
                 Nome = deletedUsuario.Nome,
-                Email = deletedUsuario.Email
+                Email = deletedUsuario.Email,
+                Perfil = deletedUsuario.Perfil
             };
         }
 
@@ -86,7 +88,8 @@ namespace Escola.Application.Services
             {
                 Id = usuario.Id,
                 Nome = usuario.Nome,
-                Email = usuario.Email
+                Email = usuario.Email,
+                Perfil = usuario.Perfil
             };
         }
 
@@ -102,7 +105,8 @@ namespace Escola.Application.Services
             {
                 Id = updatedUsuario.Id,
                 Nome = updatedUsuario.Nome,
-                Email = updatedUsuario.Email
+                Email = updatedUsuario.Email,
+                Perfil = updatedUsuario.Perfil
             };
         }
     }
