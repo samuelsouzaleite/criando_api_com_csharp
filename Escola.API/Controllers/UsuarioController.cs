@@ -21,7 +21,7 @@ namespace Escola.API.Controllers
             _authenticate = authenticateService;
         }
 
-        [HttpPost]
+        [HttpPost] //Implementar futuramente um serviço de verificação de e-mail para validar o cadastro do usuário
         public async Task<ActionResult> CreateUsuario(UsuarioPostDTO usuarioPostDTO)
         {
             var usuarioExists = await _authenticate.UserExists(usuarioPostDTO.Email);

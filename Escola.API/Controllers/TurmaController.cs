@@ -2,6 +2,8 @@ using Escola.API.Errors;
 using Escola.Application.DTOs.Turma;
 using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
+using Escola.Infra.Ioc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +11,7 @@ namespace Escola.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     public class TurmaController : Controller
     {
         private readonly ITurmaService _turmaService;
@@ -17,6 +20,7 @@ namespace Escola.API.Controllers
             _turmaService = turmaService;
         }
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> CreateTurma(TurmaPostDTO turmaPostDTO)
         {
             var createdTurma = await _turmaService.AddAsync(turmaPostDTO);
@@ -24,6 +28,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> UpdateTurma(TurmaPutDTO turmaPutDTO)
         {
             var updatedTurma = await _turmaService.UpdateAsync(turmaPutDTO);
@@ -31,6 +36,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> DeleteTurma(int id)
         {
             var deletedTurma = await _turmaService.DeleteAsync(id);
@@ -38,6 +44,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> GetTurmaById(int id)
         {
             var turma = await _turmaService.GetByIdAsync(id);
@@ -49,9 +56,20 @@ namespace Escola.API.Controllers
         }
         
         [HttpGet]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> GetAllTurmas()
         {
             var turmas = await _turmaService.GetAllAsync();
+            return Ok(turmas);
+        }
+
+        [HttpGet("user")]
+        [Authorize(Roles = "Aluno, Administrador")]
+        public async Task<ActionResult> GetAllTurmasByUsuario()
+        {
+            var userId = User.GetUserId();
+
+            var turmas = await _turmaService.GetTurmasByUsuario(userId);
             return Ok(turmas);
         }
     }

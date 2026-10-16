@@ -47,6 +47,13 @@ namespace Escola.Infra.Data.Repositories
             return await _context.Nota.Where(x => x.Excluido == false && x.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<List<Nota>> GetNotasByTurmaUsuario(int turmaId, int usuarioId)
+        {
+            return await _context.Nota
+                .Where(x => x.Excluido == false && x.Matricula.TurmaId == turmaId && x.Matricula.UsuarioId == usuarioId)
+                .ToListAsync();
+        }
+
         public async Task<Nota> UpdateAsync(Nota nota)
         {
             _context.Nota.Update(nota);

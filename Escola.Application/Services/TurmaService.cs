@@ -14,10 +14,12 @@ namespace Escola.Application.Services
     {
         private readonly ITurmaRepository _turmaRepository;
         private readonly ICursoRepository _cursoRepository;
-        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository)
+        private readonly IUsuarioRepository _usuarioRepository;
+        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository, IUsuarioRepository usuarioRepository)
         {
             _turmaRepository = turmaRepository;
             _cursoRepository = cursoRepository;
+            _usuarioRepository = usuarioRepository;
         }
         public async Task<TurmaGetDTO> AddAsync(TurmaPostDTO turmaPostDTO)
         {
@@ -59,6 +61,7 @@ namespace Escola.Application.Services
 
         public async Task<List<TurmaGetDetailDTO>> GetAllAsync()
         {
+
             var turmas = await _turmaRepository.GetAllAsync();
             var turmaGetDetailDTO = new List<TurmaGetDetailDTO>();
             turmaGetDetailDTO.AddRange(turmas.Select(turma => new TurmaGetDetailDTO
@@ -94,6 +97,26 @@ namespace Escola.Application.Services
                 }
             };
         }
+
+        public async Task<List<TurmaGetDetailDTO>> GetTurmasByUsuario(int idUsuario)
+        {
+            var turmas = await _turmaRepository.GetTurmasByUsuario(idUsuario);
+            var turmaGetDetailDTO = new List<TurmaGetDetailDTO>();
+            turmaGetDetailDTO.AddRange(turmas.Select(turma => new TurmaGetDetailDTO
+            {
+                Id = turma.Id,
+                Nome = turma.Nome,
+                Descricao = turma.Descricao,
+                Curso = new CursoGetDTO
+                {
+                    Id = turma.Curso.Id,
+                    Nome = turma.Curso.Nome,
+                    Descricao = turma.Curso.Descricao
+                }
+            }));
+            return turmaGetDetailDTO;
+        }
+
 
         public async Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO)
         {

@@ -12,5 +12,6 @@ namespace Escola.Domain.Interfaces
         Task<Nota> AddAsync(Nota nota);
         Task<Nota> UpdateAsync(Nota nota);
         Task<Nota> DeleteAsync(int id);
+        Task<List<Nota>> GetNotasByTurmaUsuario(int turmaId, int usuarioId);
     }
 }
