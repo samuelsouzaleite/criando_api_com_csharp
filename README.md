@@ -23,6 +23,7 @@ O objetivo não é só fazer funcionar, e sim praticar **separação de responsa
 - **.NET 10** / ASP.NET Core Web API
 - **Entity Framework Core 10** com abordagem **Code First**
 - **PostgreSQL** (provider Npgsql)
+- **JWT** (`Microsoft.AspNetCore.Authentication.JwtBearer`) para autenticação e autorização
 - **Swagger / OpenAPI** (Swashbuckle)
 - **Docker** e Docker Compose
 - **User Secrets** e `.env` para gerenciamento de credenciais
@@ -82,15 +83,15 @@ Exclusão é feita por **soft delete**: o registro recebe a marca de excluído e
 - [x] Documentação com Swagger
 - [x] Container Docker
 - [x] Credenciais fora do repositório
-- [x] Controllers de Curso, Turma, Matrícula e Nota, com CRUD completo
+- [x] Controllers de Curso, Turma, Matrícula, Nota e Usuário, com CRUD completo
 - [x] Exceções próprias do domínio (`NotFoundException`, `BadRequestException`)
 - [x] Tratamento global de erros com middleware, traduzindo exceções em status HTTP e devolvendo um JSON padronizado
+- [x] Autenticação com **JWT**: login, token assinado com validade de 1 hora e botão *Authorize* no Swagger
+- [x] Autorização por perfil (Administrador e Aluno) declarada endpoint a endpoint
+- [x] Endpoints que devolvem apenas os dados do próprio aluno, com o id lido do token
 
 ## 🚧 Em andamento
 
-- [ ] Controller de Usuário
-- [ ] Autenticação e autorização com **JWT**
-- [ ] Controle de acesso por perfil (aluno, professor, administrador)
 - [ ] Paginação nas consultas
 - [ ] Testes automatizados
 
@@ -111,14 +112,20 @@ git clone https://github.com/samuelsouzaleite/criando_api_com_csharp.git
 cd criando_api_com_csharp
 ```
 
-### 2. Configurar a connection string
+### 2. Configurar os segredos
 
-As credenciais **não** ficam no repositório. O `appsettings.json` traz apenas o formato, com a senha vazia.
+As credenciais **não** ficam no repositório. O `appsettings.json` traz apenas o formato, com os valores vazios.
 
 Para rodar localmente, use o User Secrets:
 
 ```bash
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "User ID=postgres;Password=SUA_SENHA;Host=localhost;Port=5432;Database=Escola;Pooling=true;Connection Lifetime=0;" --project Escola.API
+```
+
+A chave que assina os tokens JWT também fica fora do repositório. Gere uma aleatória e guarde do mesmo jeito:
+
+```bash
+$bytes = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); dotnet user-secrets set "Jwt:SecretKey" ([Convert]::ToBase64String($bytes)) --project Escola.API
 ```
 
 ### 3. Criar o banco
@@ -177,7 +184,25 @@ Onde `{entidade}` é **Curso**, **Turma**, **Matricula** ou **Nota**.
 
 As consultas de Turma e Matrícula devolvem os dados relacionados (o curso da turma, o usuário e a turma da matrícula).
 
-O service e o repository de Usuário já existem, com o hash de senha pronto. O controller vem junto com a autenticação.
+### Autenticação
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| `POST` | `/api/Usuario` | público | Cadastra um usuário. O primeiro vira **Administrador**, os demais **Aluno** |
+| `POST` | `/api/Usuario/login` | público | Valida e-mail e senha e devolve o token JWT |
+
+O token vale **1 hora** e carrega o id, o e-mail e o perfil do usuário. Para usá-lo no Swagger, clique em **Authorize** e informe o token.
+
+### Rotas do próprio aluno
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| `GET` | `/api/Turma/user` | Aluno, Administrador | Turmas em que o usuário logado está matriculado |
+| `GET` | `/api/Nota/user/turma/{id}` | Aluno, Administrador | Notas do usuário logado em uma turma |
+
+Nessas rotas o id do usuário é lido **do token**, nunca de um parâmetro enviado pelo cliente. Sem isso, bastaria trocar um número na requisição para acessar os dados de outro aluno.
+
+As demais rotas exigem o perfil **Administrador**.
 
 ### Respostas de erro
 
@@ -195,7 +220,8 @@ Qualquer exceção é interceptada pelo middleware e devolvida em um formato ún
 |---|---|
 | Registro não encontrado (`NotFoundException`) | `404` |
 | Requisição inválida (`BadRequestException`) | `400` |
-| Acesso não autorizado | `401` |
+| Sem token, ou token inválido / expirado | `401` |
+| Token válido, mas sem permissão para a rota | `403` |
 | Qualquer outra exceção | `500` |
 
 O campo `details` traz o stack trace apenas em ambiente de desenvolvimento.
@@ -232,13 +258,15 @@ criando_api_com_csharp/
 
 ## 🔐 Sobre as credenciais
 
-Nenhuma senha entra no repositório, nem no histórico do Git:
+Dois segredos precisam existir para a aplicação rodar: a **senha do banco** e a **chave que assina os tokens JWT**. Nenhum dos dois entra no repositório.
 
-| Onde roda | De onde vem a senha |
+| Onde roda | De onde vêm os segredos |
 |---|---|
 | Local (`dotnet run`) | User Secrets, fora da pasta do projeto |
 | Docker | arquivo `.env`, ignorado pelo Git |
-| `appsettings.json` | só o formato, com o valor vazio |
+| `appsettings.json` | só o formato, com os valores vazios |
+
+A chave do JWT merece o mesmo cuidado que a senha do banco, ou mais: quem a tiver consegue **forjar um token válido** e se passar por qualquer usuário, inclusive administrador, sem precisar de senha.
 
 ---
 

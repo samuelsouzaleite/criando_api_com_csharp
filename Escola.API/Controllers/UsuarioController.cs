@@ -46,12 +46,5 @@ namespace Escola.API.Controllers
             var token =  _authenticate.GenerateToken(usuario.Id, usuario.Email.ToLower(), usuario.Perfil);
             return Ok(new { Nome = usuario.Nome, Token = token });
         }
-
-        /*[HttpGet("rota-de-teste")]
-        [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult> Teste()
-        {
-            return Ok(new { message = "passou aqui" });
-        }*/
     }
 }
