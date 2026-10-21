@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using Escola.Infra.Data.Context;
+using Escola.Infra.Data.Helpers;
 using Microsoft.EntityFrameworkCore;  
 
 namespace Escola.Infra.Data.Repositories
@@ -37,9 +39,11 @@ namespace Escola.Infra.Data.Repositories
             return curso;
         }
 
-        public async Task<List<Curso>> GetAllAsync()
+        public async Task<PagedList<Curso>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Curso.Where( x => x.Excluido == false).ToListAsync();
+            var query = _context.Curso.Where(x => x.Excluido == false).AsNoTracking();
+            return await PaginationHelper.CreateAsync(query, pageNumber, pageSize);
+            //return await _context.Curso.Where( x => x.Excluido == false).ToListAsync();
         }
 
         public async Task<Curso> GetByIdAsync(int id)
