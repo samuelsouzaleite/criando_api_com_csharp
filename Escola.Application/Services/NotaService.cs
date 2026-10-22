@@ -3,6 +3,7 @@ using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -59,22 +60,19 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<NotaGetDTO>> GetAllAsync()
+        public async Task<PagedList<NotaGetDTO>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var notas = await _notaRepository.GetAllAsync();
-            var notaDTOs = new List<NotaGetDTO>();
-            foreach (var nota in notas)
+            var notas = await _notaRepository.GetAllAsync(pageNumber, pageSize);
+            var notaDTOs = notas.Select(nota => new NotaGetDTO
             {
-                notaDTOs.Add(new NotaGetDTO
-                {
-                    Id = nota.Id,
-                    MatriculaId = nota.MatriculaId,
-                    ValorNota = nota.ValorNota,
-                    Aprovado = nota.Aprovado,
-                    DataNota = nota.DataNota
-                });
-            }
-            return notaDTOs;
+                Id = nota.Id,
+                MatriculaId = nota.MatriculaId,
+                ValorNota = nota.ValorNota,
+                Aprovado = nota.Aprovado,
+                DataNota = nota.DataNota
+            }).ToList();
+
+            return new PagedList<NotaGetDTO>(notaDTOs, notas.CurrentPage, notas.PageSize, notas.TotalCount);
         }
 
         public async Task<NotaGetDTO> GetByIdAsync(int id)
@@ -92,22 +90,19 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<NotaGetDTO>> GetNotasByTurmaUsuario(int idTurma, int idUsuario)
+        public async Task<PagedList<NotaGetDTO>> GetNotasByTurmaUsuario(int idTurma, int idUsuario, int pageNumber, int pageSize)
         {
-            var notas = await _notaRepository.GetNotasByTurmaUsuario(idTurma, idUsuario);
-            var notaDTOs = new List<NotaGetDTO>();
-            foreach (var nota in notas)
+            var notas = await _notaRepository.GetNotasByTurmaUsuario(idTurma, idUsuario, pageNumber, pageSize);
+            var notaDTOs = notas.Select(nota => new NotaGetDTO
             {
-                notaDTOs.Add(new NotaGetDTO
-                {
-                    Id = nota.Id,
-                    MatriculaId = nota.MatriculaId,
-                    ValorNota = nota.ValorNota,
-                    Aprovado = nota.Aprovado,
-                    DataNota = nota.DataNota
-                });
-            }
-            return notaDTOs;
+                Id = nota.Id,
+                MatriculaId = nota.MatriculaId,
+                ValorNota = nota.ValorNota,
+                Aprovado = nota.Aprovado,
+                DataNota = nota.DataNota
+            }).ToList();
+
+            return new PagedList<NotaGetDTO>(notaDTOs, notas.CurrentPage, notas.PageSize, notas.TotalCount);
         }
 
 

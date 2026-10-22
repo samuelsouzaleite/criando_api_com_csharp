@@ -5,6 +5,7 @@ using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -70,11 +71,10 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<MatriculaGetDetailDTO>> GetAllAsync()
+        public async Task<PagedList<MatriculaGetDetailDTO>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var matriculas = await _matriculaRepository.GetAllAsync();
-            var matriculaGetDetailDTO = new List<MatriculaGetDetailDTO>();
-            matriculaGetDetailDTO.AddRange(matriculas.Select(matricula => new MatriculaGetDetailDTO
+            var matriculas = await _matriculaRepository.GetAllAsync(pageNumber, pageSize);
+            var matriculaGetDetailDTO = matriculas.Select(matricula => new MatriculaGetDetailDTO
             {
                Id = matricula.Id,
                DataMatricula = matricula.DataMatricula,
@@ -92,9 +92,8 @@ namespace Escola.Application.Services
                    Nome = matricula.Turma.Nome,
                    Descricao = matricula.Turma.Descricao
                }
-            }
-            ));
-            return matriculaGetDetailDTO;
+            }).ToList();
+            return new PagedList<MatriculaGetDetailDTO>(matriculaGetDetailDTO, matriculas.TotalCount, matriculas.CurrentPage, matriculas.PageSize);
         }
 
         public async Task<MatriculaGetDetailDTO> GetByIdAsync(int id)

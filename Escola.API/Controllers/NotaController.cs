@@ -1,3 +1,5 @@
+using Escola.API.Extensions;
+using Escola.API.Models;
 using Escola.Application.DTOs.Nota;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
@@ -76,19 +78,27 @@ namespace Escola.API.Controllers
         [HttpGet]
         [Authorize(Roles = "Administrador")]
 
-        public async Task<ActionResult> GetAllNotas()
+        public async Task<ActionResult> GetAllNotas([FromQuery] PaginationParams paginationParams)
         {
-            var notas = await _notaService.GetAllAsync();
+            var notas = await _notaService.GetAllAsync(paginationParams.PageNumber, paginationParams.PageSize);
+
+            Response.AddPaginationHeader(
+                new PaginationHeader(paginationParams.PageNumber, paginationParams.PageSize, notas.TotalCount, notas.TotalPages));
+
             return Ok(notas);
         }
 
         [HttpGet("user/turma/{id}")]
         [Authorize(Roles = "Aluno, Administrador")]
 
-        public async Task<ActionResult> GetAllNotasByTumasUsuario(int id)
+        public async Task<ActionResult> GetAllNotasByTumasUsuario(int id, [FromQuery] PaginationParams paginationParams)
         {
             var userId = User.GetUserId();
-            var notas = await _notaService.GetNotasByTurmaUsuario(id, userId);
+            var notas = await _notaService.GetNotasByTurmaUsuario(id, userId, paginationParams.PageNumber, paginationParams.PageSize);
+
+            Response.AddPaginationHeader(
+                new PaginationHeader(paginationParams.PageNumber, paginationParams.PageSize, notas.TotalCount, notas.TotalPages));
+
             return Ok(notas);
         }
     }
