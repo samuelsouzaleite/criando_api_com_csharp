@@ -53,7 +53,7 @@ namespace Escola.Infra.Data.Repositories
         public async Task<PagedList<Nota>> GetNotasByTurmaUsuario(int turmaId, int usuarioId, int pageNumber, int pageSize)
         {
             var query = _context.Nota
-                .Where(x => x.Excluido == false && x.Matricula.TurmaId == turmaId && x.Matricula.UsuarioId == usuarioId)
+                .Where(x => x.Excluido == false && x.Matricula.TurmaId == turmaId && x.Matricula.UsuarioId == usuarioId && x.Matricula.Excluido == false)
                 .AsNoTracking();
             return await PaginationHelper.CreateAsync(query, pageNumber, pageSize);
         }

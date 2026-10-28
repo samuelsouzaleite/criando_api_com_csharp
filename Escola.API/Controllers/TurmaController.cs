@@ -71,11 +71,15 @@ namespace Escola.API.Controllers
 
         [HttpGet("user")]
         [Authorize(Roles = "Aluno, Administrador")]
-        public async Task<ActionResult> GetAllTurmasByUsuario()
+        public async Task<ActionResult> GetAllTurmasByUsuario([FromQuery] PaginationParams paginationParams)
         {
             var userId = User.GetUserId();
 
-            var turmas = await _turmaService.GetTurmasByUsuario(userId);
+            var turmas = await _turmaService.GetTurmasByUsuario(userId, paginationParams.PageNumber, paginationParams.PageSize);
+
+            Response.AddPaginationHeader(
+                new PaginationHeader(paginationParams.PageNumber, paginationParams.PageSize, turmas.TotalCount, turmas.TotalPages));
+
             return Ok(turmas);
         }
     }

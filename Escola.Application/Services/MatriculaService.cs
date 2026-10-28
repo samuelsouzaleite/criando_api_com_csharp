@@ -84,13 +84,15 @@ namespace Escola.Application.Services
                {
                    Id = matricula.Usuario.Id,
                    Nome = matricula.Usuario.Nome,
-                   Email = matricula.Usuario.Email
+                   Email = matricula.Usuario.Email,
+                   Perfil = matricula.Usuario.Perfil
                },
                Turma = new TurmaGetDTO
                {
                    Id = matricula.Turma.Id,
                    Nome = matricula.Turma.Nome,
-                   Descricao = matricula.Turma.Descricao
+                   Descricao = matricula.Turma.Descricao,
+                   CursoId = matricula.Turma.CursoId
                }
             }).ToList();
             return new PagedList<MatriculaGetDetailDTO>(matriculaGetDetailDTO, matriculas.TotalCount, matriculas.CurrentPage, matriculas.PageSize);
@@ -111,13 +113,15 @@ namespace Escola.Application.Services
                 {
                     Id = matricula.Usuario.Id,
                     Nome = matricula.Usuario.Nome,
-                    Email = matricula.Usuario.Email
+                    Email = matricula.Usuario.Email,
+                    Perfil = matricula.Usuario.Perfil
                 },
                 Turma = new TurmaGetDTO
                 {
                         Id = matricula.Turma.Id,
                         Nome = matricula.Turma.Nome,
-                        Descricao = matricula.Turma.Descricao
+                        Descricao = matricula.Turma.Descricao,
+                        CursoId = matricula.Turma.CursoId
                 }
             }; 
         }
@@ -132,12 +136,12 @@ namespace Escola.Application.Services
             {
                 throw new NotFoundException("Matrícula não encontrada.");
             }
-            var matricula = new Matricula
-            {
-                Id = matriculaPutDTO.Id,
-                TurmaId = matriculaPutDTO.TurmaId,
-                DataExpiracao = matriculaPutDTO.DataExpiracao
-            };
+
+            var matricula = await _matriculaRepository.GetByIdAsync(matriculaPutDTO.Id);
+
+            matricula.TurmaId = matriculaPutDTO.TurmaId;
+            matricula.DataExpiracao = matriculaPutDTO.DataExpiracao;
+
             var updatedMatricula = await _matriculaRepository.UpdateAsync(matricula);
             if (updatedMatricula == null)
                 return null;
