@@ -89,10 +89,13 @@ Exclusão é feita por **soft delete**: o registro recebe a marca de excluído e
 - [x] Autenticação com **JWT**: login, token assinado com validade de 1 hora e botão *Authorize* no Swagger
 - [x] Autorização por perfil (Administrador e Aluno) declarada endpoint a endpoint
 - [x] Endpoints que devolvem apenas os dados do próprio aluno, com o id lido do token
+- [x] Paginação nas listagens, com `Skip`/`Take` aplicados na consulta (`LIMIT`/`OFFSET` no banco)
+- [x] Validação dos parâmetros de paginação, com tamanho máximo de página
+- [x] Metadados de paginação devolvidos em header HTTP
+- [x] `AsNoTracking` nas consultas de leitura
 
 ## 🚧 Em andamento
 
-- [ ] Paginação nas consultas
 - [ ] Testes automatizados
 
 ---
@@ -184,6 +187,29 @@ Onde `{entidade}` é **Curso**, **Turma**, **Matricula** ou **Nota**.
 
 As consultas de Turma e Matrícula devolvem os dados relacionados (o curso da turma, o usuário e a turma da matrícula).
 
+### Paginação
+
+As listagens aceitam dois parâmetros na query string:
+
+```
+GET /api/Turma?pageNumber=1&pageSize=10
+```
+
+| Parâmetro | Regra |
+|---|---|
+| `pageNumber` | maior que zero |
+| `pageSize` | entre 1 e 50 |
+
+Fora desses limites, a requisição é recusada com `400 Bad Request` antes de chegar ao banco.
+
+O `Skip`/`Take` é aplicado **na consulta**, não em memória: a instrução sai traduzida para `LIMIT` e `OFFSET` no PostgreSQL, e só os registros da página trafegam.
+
+Os metadados vão no header **`Pagination`** da resposta, para o corpo continuar sendo uma lista limpa:
+
+```json
+{ "currentPage": 1, "itemsPerPage": 10, "totalItems": 134, "totalPages": 14 }
+```
+
 ### Autenticação
 
 | Método | Rota | Acesso | Descrição |
@@ -200,7 +226,7 @@ O token vale **1 hora** e carrega o id, o e-mail e o perfil do usuário. Para us
 | `GET` | `/api/Turma/user` | Aluno, Administrador | Turmas em que o usuário logado está matriculado |
 | `GET` | `/api/Nota/user/turma/{id}` | Aluno, Administrador | Notas do usuário logado em uma turma |
 
-Nessas rotas o id do usuário é lido **do token**, nunca de um parâmetro enviado pelo cliente. Sem isso, bastaria trocar um número na requisição para acessar os dados de outro aluno.
+Nessas rotas o id do usuário é lido **do token**, nunca de um parâmetro enviado pelo cliente. Sem isso, bastaria trocar um número na requisição para acessar os dados de outro aluno. Elas também aceitam `pageNumber` e `pageSize`, e consideram apenas matrículas ativas e não excluídas.
 
 As demais rotas exigem o perfil **Administrador**.
 
@@ -242,11 +268,15 @@ criando_api_com_csharp/
 │   ├── Interfaces/
 │   └── Services/
 ├── Escola.Domain/                 # Núcleo
+│   ├── Account/                   # Contrato de autenticação
 │   ├── Entities/
-│   └── Interfaces/
+│   ├── Interfaces/
+│   └── Pagination/                # PagedList
 ├── Escola.Infra.Data/             # Acesso a dados
 │   ├── Context/
 │   ├── EntitiesConfiguration/     # Fluent API
+│   ├── Helpers/                   # PaginationHelper
+│   ├── Identity/                  # Geração e validação de token
 │   ├── Migrations/
 │   └── Repositories/
 ├── Escola.Infra.Ioc/              # Injeção de dependência
