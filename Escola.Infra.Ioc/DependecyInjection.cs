@@ -58,7 +58,8 @@ namespace Escola.Infra.Ioc
             services.AddScoped<INotaService, NotaService>();
             services.AddScoped<ITurmaService, TurmaService>();
             services.AddScoped<IUsuarioService, UsuarioService>();
-            services.AddScoped<IAuthenticate, AuthenticateService>();
+            services.AddScoped<IAuthenticate, AuthenticateProvider>();
+            services.AddScoped<IAuthenticateService, AuthenticateService>();
 
             return services;
         }

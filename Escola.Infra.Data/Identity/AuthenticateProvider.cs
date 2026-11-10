@@ -12,31 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Escola.Infra.Data.Identity
 {
-    public class AuthenticateService : IAuthenticate
+    public class AuthenticateProvider : IAuthenticate
     {
-        private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthenticateService(ApplicationDbContext context, IConfiguration configuration)
+        public AuthenticateProvider(IConfiguration configuration)
         {
-            _context = context;
             _configuration = configuration;
-        }
-
-        public async Task<bool> AuthenticateAsync(string email, string senha)
-        {
-            var usuario = await _context.Usuario
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && u.Excluido == false);
-            if (usuario == null || usuario.Excluido)
-                return false;
-            using var hmac = new System.Security.Cryptography.HMACSHA512(usuario.PasswordSalt);
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(senha));
-            for (int i = 0; i < computedHash.Length; i++)
-            {
-                if (computedHash[i] != usuario.PasswordHash[i])
-                    return false;
-            }
-            return true;
         }
 
         public string GenerateToken(int id, string email, string role)
@@ -62,16 +44,6 @@ namespace Escola.Infra.Data.Identity
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<Usuario> GetUsuarioByEmail(string email)
-        {
-            return await _context.Usuario
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && u.Excluido == false);
-        }
-
-        public async Task<bool> UserExists(string email)
-        {
-            return await _context.Usuario
-                .AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.Excluido == false);
-        }
+        
     }
 }

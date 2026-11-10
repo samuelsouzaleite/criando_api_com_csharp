@@ -54,6 +54,18 @@ namespace Escola.Infra.Data.Repositories
             return await _context.Usuario.Where(x => x.Excluido == false && x.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<Usuario> GetUsuarioByEmail(string email)
+        {
+            return await _context.Usuario
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && u.Excluido == false);
+        }
+
+        public async Task<bool> UserExists(string email)
+        {
+            return await _context.Usuario
+                .AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.Excluido == false);
+        }
+
         public async Task<Usuario> UpdateAsync(Usuario usuario)
         {
             _context.Usuario.Update(usuario);

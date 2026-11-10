@@ -14,5 +14,7 @@ namespace Escola.Domain.Interfaces
         Task<Usuario> UpdateAsync(Usuario usuario);
         Task<Usuario> DeleteAsync(int id);
         Task<bool> ExisteUsuarioAsync();
+        Task<Usuario> GetUsuarioByEmail(string email);
+        Task<bool> UserExists(string email);
     }
 }
