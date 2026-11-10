@@ -4,11 +4,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Escola.Application.DTOs.Usuario;
 using Escola.Application.Exceptions;
+using Escola.Application.Interfaces;
 using Escola.Domain.Account;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
 
-namespace Escola.Application.Interfaces
+namespace Escola.Application.Services
 {
     public class AuthenticateService : IAuthenticateService
     {

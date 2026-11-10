@@ -89,6 +89,9 @@ Exclusão é feita por **soft delete**: o registro recebe a marca de excluído e
 - [x] Autenticação com **JWT**: login, token assinado com validade de 1 hora e botão *Authorize* no Swagger
 - [x] Autorização por perfil (Administrador e Aluno) declarada endpoint a endpoint
 - [x] Endpoints que devolvem apenas os dados do próprio aluno, com o id lido do token
+- [x] Autenticação separada em duas responsabilidades: a regra de negócio (conferir a senha) fica na Application, a geração do token JWT fica na Infra
+- [x] Cadastro recusa e-mail já utilizado, respondendo `400` com mensagem clara
+- [x] Services sinalizam erro com exceções de domínio em vez de devolver `null`
 - [x] Paginação nas listagens, com `Skip`/`Take` aplicados na consulta (`LIMIT`/`OFFSET` no banco)
 - [x] Validação dos parâmetros de paginação, com tamanho máximo de página
 - [x] Metadados de paginação devolvidos em header HTTP
@@ -218,6 +221,15 @@ Os metadados vão no header **`Pagination`** da resposta, para o corpo continuar
 | `POST` | `/api/Usuario/login` | público | Valida e-mail e senha e devolve o token JWT |
 
 O token vale **1 hora** e carrega o id, o e-mail e o perfil do usuário. Para usá-lo no Swagger, clique em **Authorize** e informe o token.
+
+O fluxo é dividido em duas responsabilidades:
+
+| Contrato | Camada | Responsabilidade |
+|---|---|---|
+| `IAuthenticateService` | Application | Regra de negócio: busca o usuário, confere o hash da senha e devolve os dados |
+| `IAuthenticate` | Domain / Infra | Detalhe técnico: assina e emite o token JWT |
+
+Assim, trocar JWT por outro mecanismo de token amanhã não mexe na regra de autenticação.
 
 ### Rotas do próprio aluno
 
