@@ -5,6 +5,7 @@ using Escola.Domain.Account;
 using Microsoft.AspNetCore.Authorization;
 using Escola.API.Models;
 using Escola.API.Extensions;
+using Escola.Infra.Ioc;
 
 namespace Escola.API.Controllers
 {
@@ -46,6 +47,22 @@ namespace Escola.API.Controllers
             
             var token =  _authenticate.GenerateToken(usuario.Id, usuario.Email.ToLower(), usuario.Perfil);
             return Ok(new { Nome = usuario.Nome, Token = token });
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult> UpdateUsuario(UsuarioPutDTO usuarioPutDTO)
+        {
+            await _usuarioService.UpdateAsync(User.GetUserId(),usuarioPutDTO);
+            return Ok(new { message = "Usuário atualizado com sucesso." });
+        }
+
+        [HttpPut("alterar-senha")]
+        [Authorize]
+        public async Task<ActionResult> AlterarSenha(AlterarSenhaDTO alterarSenhaDTO)
+        {
+            await _usuarioService.AlterarSenhaAsync(User.GetUserId(), alterarSenhaDTO);
+            return Ok(new { message = "Senha alterada com sucesso." });
         }
     }
 }

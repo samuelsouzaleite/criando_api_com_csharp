@@ -52,6 +52,29 @@ namespace Escola.Application.Services
             };
         }
 
+        public async Task AlterarSenhaAsync(int usuarioId, AlterarSenhaDTO alterarSenhaDTO)
+        {
+            var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+            if (usuario == null || usuario.Excluido)
+            {
+             throw new NotFoundException("Usuário não encontrado.");   
+            }
+
+            using var hmac = new HMACSHA512(usuario.PasswordSalt);
+            var hashInformado = hmac.ComputeHash(Encoding.UTF8.GetBytes(alterarSenhaDTO.SenhaAtual));
+            if (!hashInformado.SequenceEqual(usuario.PasswordHash))
+            {
+                throw new BadRequestException("Senha atual incorreta.");
+            }
+
+            // Gerar novo hash para a nova senha
+            using var hmacNova = new HMACSHA512();
+            usuario.PasswordHash = hmacNova.ComputeHash(Encoding.UTF8.GetBytes(alterarSenhaDTO.NovaSenha));
+            usuario.PasswordSalt = hmacNova.Key;
+            await _usuarioRepository.UpdateAsync(usuario);
+        }
+
+
         public async Task<UsuarioGetDTO> DeleteAsync(int id)
         {
             var deletedUsuario = await _usuarioRepository.DeleteAsync(id);
@@ -121,7 +144,17 @@ namespace Escola.Application.Services
             if (usuario == null)
                 throw new NotFoundException("Usuário não encontrado.");
             usuario.Nome = usuarioPutDTO.Nome;
-            usuario.Email = usuarioPutDTO.Email;
+
+            if (usuarioPutDTO.Email.ToLower() != usuario.Email.ToLower())
+            {
+                var usuarioExistente = await _usuarioRepository.UserExists(usuarioPutDTO.Email);
+                if (usuarioExistente)
+                    throw new BadRequestException("Usuário com este e-mail já existe.");
+
+                usuario.Email = usuarioPutDTO.Email;
+            }
+
+            
             var updatedUsuario = await _usuarioRepository.UpdateAsync(usuario);
             return new UsuarioGetDTO
             {

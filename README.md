@@ -96,6 +96,9 @@ Exclusão é feita por **soft delete**: o registro recebe a marca de excluído e
 - [x] Validação dos parâmetros de paginação, com tamanho máximo de página
 - [x] Metadados de paginação devolvidos em header HTTP
 - [x] `AsNoTracking` nas consultas de leitura
+- [x] Atualização do próprio cadastro (nome e e-mail), com o id lido do token
+- [x] Troca de senha em endpoint próprio, exigindo a senha atual
+- [x] Atualização recusa e-mail que já pertence a outro usuário
 
 ## 🚧 Em andamento
 
@@ -219,6 +222,8 @@ Os metadados vão no header **`Pagination`** da resposta, para o corpo continuar
 |---|---|---|---|
 | `POST` | `/api/Usuario` | público | Cadastra um usuário. O primeiro vira **Administrador**, os demais **Aluno** |
 | `POST` | `/api/Usuario/login` | público | Valida e-mail e senha e devolve o token JWT |
+| `PUT` | `/api/Usuario` | autenticado | Atualiza o nome e o e-mail do próprio usuário |
+| `PUT` | `/api/Usuario/alterar-senha` | autenticado | Troca a senha do próprio usuário, exigindo a senha atual |
 
 O token vale **1 hora** e carrega o id, o e-mail e o perfil do usuário. Para usá-lo no Swagger, clique em **Authorize** e informe o token.
 
@@ -230,6 +235,19 @@ O fluxo é dividido em duas responsabilidades:
 | `IAuthenticate` | Domain / Infra | Detalhe técnico: assina e emite o token JWT |
 
 Assim, trocar JWT por outro mecanismo de token amanhã não mexe na regra de autenticação.
+
+### Dados do próprio cadastro
+
+Atualizar o perfil e trocar a senha são operações separadas, em rotas diferentes:
+
+- `PUT /api/Usuario` altera **nome e e-mail**. O `UsuarioPutDTO` não carrega senha, justamente para que uma edição de perfil nunca mexa na credencial sem querer.
+- `PUT /api/Usuario/alterar-senha` altera **apenas a senha**, e exige a **senha atual** no corpo da requisição. Se ela estiver errada, a resposta é `400`.
+
+Nas duas rotas o usuário alterado é o dono do token: o id vem do `User.GetUserId()`, nunca do corpo da requisição.
+
+A nova senha gera um **novo salt** e um **novo hash**. O hash antigo não é reaproveitado, e em nenhum momento a senha trafega ou é guardada em texto puro.
+
+Na troca de e-mail, a comparação com o e-mail atual é feita com `ToLower()` nos dois lados. Sem isso, trocar `joao@teste.com` por `Joao@Teste.com` seria lido como mudança, a verificação de duplicidade encontraria o **próprio usuário** e a API acusaria um e-mail em uso que é dele mesmo.
 
 ### Rotas do próprio aluno
 

@@ -16,5 +16,6 @@ namespace Escola.Application.Interfaces
         Task<UsuarioGetDTO> DeleteAsync(int id);
         Task<bool> ExisteUsuarioAsync();
         Task<UsuarioGetDTO> GetUsuarioByEmail(string email);
+        Task AlterarSenhaAsync(int usuarioId, AlterarSenhaDTO alterarSenhaDTO);
     }
 }
