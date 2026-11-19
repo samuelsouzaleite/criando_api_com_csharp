@@ -18,6 +18,7 @@ namespace Escola.Infra.Data.Context
         public DbSet<Nota> Nota { get; set; }
         public DbSet<Turma> Turma { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
+        public DbSet<CodigoRecuperacaoSenha> CodigoRecuperacaoSenha { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
